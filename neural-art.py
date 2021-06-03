@@ -3,6 +3,12 @@ from tensorflow.keras.preprocessing import image
 import os
 
 def load_input_image():
+    """ Load input image based on user-specified filename.
+
+    Returns:
+        np array: Input (content) image
+    """
+
     filename = ''
     img_path = ''
     
@@ -22,6 +28,12 @@ def load_input_image():
     return input_arr
 
 def load_style_image():
+    """ Load style image based on user-specified filename.
+
+    Returns:
+        np array: Style image
+    """
+
     filename = ''
     img_path = ''
     
