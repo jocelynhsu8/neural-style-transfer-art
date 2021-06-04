@@ -65,6 +65,7 @@ def get_save_dir():
         print('ERROR: File with given filename already exists!')
     return save_dir
 
+# TODO:
 def generate(input_image, style_image, iterations = 50):
     return input_image
 
