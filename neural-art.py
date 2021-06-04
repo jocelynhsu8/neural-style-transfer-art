@@ -68,6 +68,13 @@ def get_save_dir():
 
 # TODO
 def generate(input_image, style_image, iterations = 50):
+    model = keras.applications.VGG19(
+            include_top = False, 
+            weights = 'imagenet', 
+            input_shape = (800, 1200, 3))
+
+    mod_input = np.expand_dims(input_image, axis = 0)
+    mod_style = np.expand_dims(style_image, axis = 0)
     
     return input_image
 
@@ -78,10 +85,10 @@ def main():
     save_dir = get_save_dir()
 
     result = generate(input_image, style_image)
-    print(result.shape)
-    result = np.clip(result, 0, 255).astype('uint8')
-    result_image = Image.fromarray(result)
-    result_image.save(save_dir)
+
+    #result = np.clip(result, 0, 255).astype('uint8')
+    #result_image = Image.fromarray(result)
+    #result_image.save(save_dir)
     
     print('Output image saved successfully! ')
 
