@@ -1,11 +1,12 @@
 import numpy as np
+from tensorflow import keras
 from tensorflow.keras.preprocessing import image
+import cv2
 import os
 from PIL import Image
 
-# TODO: Will need to resize image based on network
-def load_input_image(filename = '', img_path = ''):
-    """ Load input image based on user-specified filename.
+def load_input_image(filename = '', img_path = '', dim = (800, 1200)):
+    """ Load input image based on user-specified filename. Images are resized to 640 x 480.
 
     Returns:
         np array: Input (content) image
@@ -20,14 +21,14 @@ def load_input_image(filename = '', img_path = ''):
         print('ERROR: Input image not found')
     
     img = image.load_img(img_path)
-    input_arr = image.img_to_array(img)
-    input_arr = np.array([input_arr])
-    
-    return input_arr
+    data = image.img_to_array(img)
+    input_image = np.array([data])
+    input_image = image.smart_resize(input_image[0], dim, interpolation = 'bilinear') 
+    return input_image
 
-# TODO: Will need to resize image based on network
-def load_style_image(filename = '', img_path = ''):
-    """ Load style image based on user-specified filename.
+
+def load_style_image(filename = '', img_path = '', dim = (800, 1200)):
+    """ Load style image based on user-specified filename. Images are resized to 640 x 480.
 
     Returns:
         np array: Style image
@@ -41,12 +42,12 @@ def load_style_image(filename = '', img_path = ''):
             break
         
         print('ERROR: Style image not found')
-    
-    img = image.load_img(img_path)
-    input_arr = image.img_to_array(img)
-    input_arr = np.array([input_arr])
-    
-    return input_arr
+
+    img = image.load_img(img_path, target_size = dim)
+    data = image.img_to_array(img)
+    style_image = np.array([data])
+
+    return style_image
 
 def get_save_dir():
     """ Prompt user to receive valid save filename
@@ -65,9 +66,11 @@ def get_save_dir():
         print('ERROR: File with given filename already exists!')
     return save_dir
 
-# TODO:
+# TODO
 def generate(input_image, style_image, iterations = 50):
+    
     return input_image
+
 
 def main():
     input_image = load_input_image()
@@ -75,7 +78,8 @@ def main():
     save_dir = get_save_dir()
 
     result = generate(input_image, style_image)
-    result = np.clip(result[0], 0, 255).astype('uint8')
+    print(result.shape)
+    result = np.clip(result, 0, 255).astype('uint8')
     result_image = Image.fromarray(result)
     result_image.save(save_dir)
     
