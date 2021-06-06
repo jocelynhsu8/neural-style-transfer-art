@@ -112,7 +112,7 @@ def generate(input_image, style_image, iterations = 200):
 
     Args:
         input_image (np array): content image
-        style_imgae (np array): style image
+        style_image (np array): style image
         iterations (int): number of optimization iterations
 
     Returns:
@@ -144,14 +144,15 @@ def generate(input_image, style_image, iterations = 200):
     style_model = intermediate_layers(s_layers)
     content_model = intermediate_layers([c_layer])
     
+    # Store content & style activations for inputs
+    c_activ = content_model(mod_input)
+    s_activ = stlye_model(mod_style)
+
     # Optimization loop
     for x in range(iterations):
         print('Step: ', x)
         # Compute  loss
-        c_activ = content_model(mod_input)
         g_c_activ = content_model(mod_gen)
-
-        s_activ = style_model(mod_style)
         g_s_activ = style_model(mod_gen)
 
         total_loss = utils.total_loss(c_activ, g_c_activ, s_activ, g_s_activ)
