@@ -14,9 +14,9 @@ def content_loss(content_img, gen_img):
         print('Images have different dimensions')
         exit()
     error = 0
-    for i in range(1, content_img.shape[1] + 1):
-        for j in range(1, content_img.shape[2] + 1):
-            for k in range(1, content_img.shape[3] + 1):
+    for i in range(0, content_img.shape[1]):
+        for j in range(0, content_img.shape[2]):
+            for k in range(0, content_img.shape[3]):
                 error += (content_img[0][i][j][k] - gen_img[0][i][j][k]) ** 2
             
     error /= content_img.shape[1] * content_img.shape[2] * content_img.shape[3]
@@ -51,9 +51,9 @@ def style_loss_ind(style_img, gen_img, weight):
         print('Images have different dimensions')
         exit()
     error = 0
-    for i in range(1, style_gram_mat.shape[1] + 1):
-        for j in range(1, style_gram_mat.shape[2] + 1):
-            for k in range(1, style_gram_mat.shape[3] + 1):
+    for i in range(0, style_gram_mat.shape[1]):
+        for j in range(0, style_gram_mat.shape[2]):
+            for k in range(0, style_gram_mat.shape[3]):
                 error += (style_gram_mat[1][i][j][k] - gen_gram_mat[1][i][j][k]) ** 2
             
     error /= style_gram_mat.shape[1] * style_gram_mat.shape[2] * style_gram_mat.shape[3]
@@ -72,13 +72,13 @@ def style_loss_overall(style_img, gen_img, weight = []):
     """
     if len(weight) == 0: # equal weight of each layer if weight not specified
         num_layers = len(style_img)
-        for i in range(1,num_layers + 1):
+        for i in range(0,num_layers):
             weight.append(1 / num_layers)
     error = 0
     for i in range(0, num_layers):
         style_gram_mat = calc_gram(style_img[i])
         gen_gram_mat = calc_gram(gen_img[i])
-        error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i - 1])
+        error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i])
     return error
     
 def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):
