@@ -7,8 +7,8 @@ import os
 from PIL import Image
 import utils
 
-def load_input_image(filename = '', img_path = '', dim = (800, 1200)):
-    """ Load input image based on user-specified filename. Images are resized to 640 x 480.
+def load_input_image(filename = '', img_path = '', dim = (400, 400)):
+    """ Load input image based on user-specified filename. Images are resized to 400 x 400.
 
     Returns:
         np array: Input (content) image
@@ -29,7 +29,7 @@ def load_input_image(filename = '', img_path = '', dim = (800, 1200)):
     return input_image
 
 
-def load_style_image(filename = '', img_path = '', dim = (800, 1200)):
+def load_style_image(filename = '', img_path = '', dim = (400, 400)):
     """ Load style image based on user-specified filename. Images are resized to 640 x 480.
 
     Returns:
@@ -80,7 +80,7 @@ def intermediate_layers(layer_names):
     model = tf.keras.applications.VGG19(
             include_top = False, 
             weights = 'imagenet', 
-            input_shape = (800, 1200, 3))
+            input_shape = (400, 400, 3))
     model.trainable = False
 
     outputs = []
@@ -89,6 +89,7 @@ def intermediate_layers(layer_names):
 
     return tf.keras.Model([model.input], outputs)
 
+@tf.function()
 def training_step(image, optimizer, total_loss):
     """ Performs one step of gradient descent to optimize image
     
@@ -136,7 +137,7 @@ def generate(input_image, style_image, iterations = 200):
     model = tf.keras.applications.VGG19(
             include_top = False, 
             weights = 'imagenet', 
-            input_shape = (800, 1200, 3))
+            input_shape = (400, 400, 3))
     optimizer = tf.optimizers.Adam(learning_rate=0.02)
     
     # Initialize mini-models
@@ -145,6 +146,7 @@ def generate(input_image, style_image, iterations = 200):
     
     # Optimization loop
     for x in range(iterations):
+        print('Step: ', x)
         # Compute  loss
         c_activ = content_model(mod_input)
         g_c_activ = content_model(mod_gen)
