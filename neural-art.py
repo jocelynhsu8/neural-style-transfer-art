@@ -5,6 +5,7 @@ from tensorflow.keras.preprocessing import image
 import cv2
 import os
 from PIL import Image
+import utils
 
 def load_input_image(filename = '', img_path = '', dim = (800, 1200)):
     """ Load input image based on user-specified filename. Images are resized to 640 x 480.
@@ -43,11 +44,11 @@ def load_style_image(filename = '', img_path = '', dim = (800, 1200)):
             break
         
         print('ERROR: Style image not found')
-
-    img = image.load_img(img_path, target_size = dim)
+    
+    img = image.load_img(img_path)
     data = image.img_to_array(img)
     style_image = np.array([data])
-
+    style_image = image.smart_resize(style_image[0], dim, interpolation = 'bilinear')
     return style_image
 
 def get_save_dir():
@@ -76,7 +77,10 @@ def intermediate_layers(layer_names):
     Returns:
         tf.keras.Model: mini-model
     """
-    model = tf.keras.applications.VGG19(include_top = False, weights = 'imagenet')
+    model = tf.keras.applications.VGG19(
+            include_top = False, 
+            weights = 'imagenet', 
+            input_shape = (800, 1200, 3))
     model.trainable = False
 
     outputs = []
