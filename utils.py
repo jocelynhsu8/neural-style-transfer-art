@@ -13,14 +13,27 @@ def content_loss(content_img, gen_img):
     if content_img.shape != gen_img.shape:
         print('Images have different dimensions')
         exit()
-    sum = 0
+    error = 0
     for i in range(1, content_img.shape[1] + 1):
         for j in range(1, content_img.shape[2] + 1):
             for k in range(1, content_img.shape[3] + 1):
-                sum += (content_img[1][i][j][k] - gen_img[1][i][j][k]) ** 2
+                error += (content_img[1][i][j][k] - gen_img[1][i][j][k]) ** 2
             
-    sum /= content_img.shape[1] * content_img.shape[2] * content_img.shape[3]
-    return sum
+    error /= content_img.shape[1] * content_img.shape[2] * content_img.shape[3]
+    return error
+
+def calc_gram(filter):
+    """ Calculate gram matrix to find correlations of feature maps in single layer.
+
+    Args:
+        filter (np array): Individual layer
+
+    Returns:
+        [np array]: Gram matrix of layer
+    """
+    filter_t = np.transpose(filter)
+    return np.matmul(filter, filter_t)
+
 
 def main():
     print('hello world')
