@@ -17,7 +17,7 @@ def content_loss(content_img, gen_img):
     for i in range(1, content_img.shape[1] + 1):
         for j in range(1, content_img.shape[2] + 1):
             for k in range(1, content_img.shape[3] + 1):
-                error += (content_img[1][i][j][k] - gen_img[1][i][j][k]) ** 2
+                error += (content_img[0][i][j][k] - gen_img[0][i][j][k]) ** 2
             
     error /= content_img.shape[1] * content_img.shape[2] * content_img.shape[3]
     return error
