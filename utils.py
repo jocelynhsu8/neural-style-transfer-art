@@ -43,7 +43,7 @@ def style_loss_ind(style_img, gen_img, weight):
         weight (double): Weight of layer
 
     Returns:
-        [int]: weighted mean squared error of filter
+        [double]: Weighted mean squared error of filter
     """
     style_gram_mat = calc_gram(style_img)
     gen_gram_mat = calc_gram(gen_img)
@@ -68,7 +68,7 @@ def style_loss_overall(style_img, gen_img, weight = []):
         weight (list, optional): List of weights for each layer. weight[i] is weight of layer i - 1. Defaults to [].
 
     Returns:
-        [int]: Overall weighted mean squared error of style image
+        [double]: Overall weighted mean squared error of style image
     """
     if len(weight) == 0: # equal weight of each layer if weight not specified
         num_layers = len(style_img)
@@ -81,10 +81,22 @@ def style_loss_overall(style_img, gen_img, weight = []):
         error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i - 1])
     return error
     
+def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):
+    """ Calculate total loss with weighted content and style mean squared errors
+
+    Args:
+        content_img (np array): Content image
+        content_gen_img (np array): Generated image for content error calculation
+        style_img_list (list of np arrays): List of style image filters
+        style_gen_img_list (list of np arrays): List of generated image filters for style error calculation
+        alpha (double): Weight for content error
+        beta (double): Weight for style error
+        weight (list, optional): List of weights for style image filters. Defaults to [].
+
+    Returns:
+        [double]: Overall error
+    """
+    return alpha * content_loss(content_img, content_gen_img) + beta * style_loss_overall(style_img_list, style_gen_img_list, weight)
 
 
-def main():
-    print('hello world')
-
-main()
 
