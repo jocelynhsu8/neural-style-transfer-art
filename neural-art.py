@@ -66,17 +66,34 @@ def get_save_dir():
         print('ERROR: File with given filename already exists!')
     return save_dir
 
-# TODO
+# TODO: FINISH IMPLEMENTATION
 def generate(input_image, style_image, iterations = 50):
     model = keras.applications.VGG19(
             include_top = False, 
             weights = 'imagenet', 
             input_shape = (800, 1200, 3))
-
+    
+    # Expand dimensions to account for batch_size when sending to model
     mod_input = np.expand_dims(input_image, axis = 0)
     mod_style = np.expand_dims(style_image, axis = 0)
-    
-    return input_image
+
+    # Let generated_image be replica of input to begin with (May later change to noise)
+    generated_image = mod_input
+   
+    # Store content & style layers
+    c_layer = 'block4_conv2'
+    s_layers = ['block1_conv1',
+                'block2_conv1',
+                'block3_conv1',
+                'block4_conv1',
+                'block5_conv1']
+
+    # Create mini-model for content and style activations
+    content_activation = keras.Model(model.inputs, model.get_layer(c_layer).output)
+
+
+
+    return generated_image
 
 
 def main():
