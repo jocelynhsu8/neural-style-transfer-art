@@ -1,5 +1,6 @@
 import numpy as np
 from tensorflow import keras
+import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import cv2
 import os
@@ -66,19 +67,58 @@ def get_save_dir():
         print('ERROR: File with given filename already exists!')
     return save_dir
 
-# TODO: FINISH IMPLEMENTATION
-def generate(input_image, style_image, iterations = 50):
-    model = keras.applications.VGG19(
-            include_top = False, 
-            weights = 'imagenet', 
-            input_shape = (800, 1200, 3))
+def intermediate_layers(layer_names):
+    """ Creates a mini-model with desired layer outputs
+
+    Args:
+        layer_names (list): list of desired layer output names
+
+    Returns:
+        tf.keras.Model: mini-model
+    """
+    model = tf.keras.applications.VGG19(include_top = False, weights = 'imagenet')
+    model.trainable = False
+
+    outputs = []
+    for name in layer_names:
+        outputs.append(model.get_layer(name).output)
+
+    return tf.keras.Model([model.input], outputs)
+
+def training_step(image, optimizer, total_loss):
+    """ Performs one step of gradient descent to optimize image
     
+    Args:
+        image (tf.Variable): generated image to optimize
+        total_loss (?): total loss (style and content)
+        optimizer (tf.optimizers): TF Optimizer (Adam)
+    """
+    tape = tf.GradientTape()
+    grad = tape.gradient(total_loss, image)
+    optimizer.apply_gradients([(grad, image)])
+    image.assign(bound_values(image))
+
+def bound_values(image):
+    return tf.clip_by_value(image, clip_value_min = 0.0, clip_value_max = 1.0)
+
+# TODO: FINISH IMPLEMENTATION
+def generate(input_image, style_image, iterations = 200):
+    """ Generates resulting image through series of optimizations
+
+    Args:
+        input_image (np array): content image
+        style_imgae (np array): style image
+        iterations (int): number of optimization iterations
+
+    Returns:
+        np array: Generated image
+    """
     # Expand dimensions to account for batch_size when sending to model
     mod_input = np.expand_dims(input_image, axis = 0)
     mod_style = np.expand_dims(style_image, axis = 0)
 
     # Let generated_image be replica of input to begin with (May later change to noise)
-    generated_image = mod_input
+    mod_gen = mod_input
    
     # Store content & style layers
     c_layer = 'block4_conv2'
@@ -87,13 +127,44 @@ def generate(input_image, style_image, iterations = 50):
                 'block3_conv1',
                 'block4_conv1',
                 'block5_conv1']
+    
+    # Initialize VGG19 model
+    model = tf.keras.applications.VGG19(
+            include_top = False, 
+            weights = 'imagenet', 
+            input_shape = (800, 1200, 3))
+    optimizer = tf.optimizers.Adam(learning_rate=0.02)
+    
+    # Initialize mini-models
+    style_model = intermediate_layers(s_layers)
+    content_model = intermediate_layers([c_layer])
+    
+    # Optimization loop
+    for x in range(iterations):
+        # Compute content loss
+        c_activ = content_model(mod_input)
+        g_c_activ = content_model(mod_gen)
+        content_loss = utils.content_loss(c_activ, g_c_activ)
 
-    # Create mini-model for content and style activations
-    content_activation = keras.Model(model.inputs, model.get_layer(c_layer).output)
+        # Compute style loss
+        s_activ = style_model(mod_style)
+        g_s_activ = style_model(mod_gen)
+        style_loss = utils.style_loss_overall(s_activ, g_s_activ)
 
+        # Compute total loss
+        total_loss = utils.total_loss(content_loss, style_loss)
 
+        # Update generated image
+        training_step(mod_gen, optimizer, total_loss)
+        
+        # Print every 10 iterations to track progress
+        if x % 10 == 0:
+            print('Iteration #: ', x)
+            print('Content loss: ', content_loss)
+            print('Style loss: ', style_loss)
+            print('Total loss: ', total_loss)
 
-    return generated_image
+    return mod_gen
 
 
 def main():
