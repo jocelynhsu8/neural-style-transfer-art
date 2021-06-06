@@ -34,17 +34,19 @@ def calc_gram(filter):
     filter_t = np.transpose(filter)
     return np.matmul(filter, filter_t)
 
-def style_loss_ind(style_gram_mat, gen_gram_mat, weight): 
-    """ Calculate mean squared error of individual filter
+def style_loss_ind(style_img, gen_img, weight): 
+    """ Calculate mean squared error of individual filter.
 
     Args:
         style_img (np array): Gram matrix of style image
         gen_img (np array): Gram matrix of generated image
-        weight (double): weight of layer
+        weight (double): Weight of layer
 
     Returns:
         [int]: weighted mean squared error of filter
     """
+    style_gram_mat = calc_gram(style_img)
+    gen_gram_mat = calc_gram(gen_img)
     if style_gram_mat.shape != gen_gram_mat.shape:
         print('Images have different dimensions')
         exit()
@@ -57,26 +59,26 @@ def style_loss_ind(style_gram_mat, gen_gram_mat, weight):
     error /= style_gram_mat.shape[1] * style_gram_mat.shape[2] * style_gram_mat.shape[3]
     return error * weight
 
-def style_loss_overall(style_img, gen_img, num_layers = 5, weight = []):
+def style_loss_overall(style_img, gen_img, weight = []):
     """ Calculate overall weighted mean squared error of all layers
 
     Args:
-        style_img (np array): Style image
-        gen_img (np array): Generated image
-        num_layers (int, optional): Number of layers. Defaults to 5.
-        weight (list, optional): List of weights for each layer. Defaults to [].
+        style_img (list of np array): List of style images
+        gen_img (list of np array): List of generated images
+        weight (list, optional): List of weights for each layer. weight[i] is weight of layer i - 1. Defaults to [].
 
     Returns:
         [int]: Overall weighted mean squared error of style image
     """
     if len(weight) == 0: # equal weight of each layer if weight not specified
+        num_layers = len(style_img)
         for i in range(1,num_layers + 1):
             weight.append(1 / num_layers)
     error = 0
-    style_gram_mat = calc_gram(style_img)
-    gen_gram_mat = calc_gram(gen_img)
-    for i in range(1, num_layers + 1):
-        error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i - 1]) # create output image?
+    for i in range(0, num_layers):
+        style_gram_mat = calc_gram(style_img[i])
+        gen_gram_mat = calc_gram(gen_img[i])
+        error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i - 1])
     return error
     
 
