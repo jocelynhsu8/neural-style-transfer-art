@@ -141,18 +141,14 @@ def generate(input_image, style_image, iterations = 200):
     
     # Optimization loop
     for x in range(iterations):
-        # Compute content loss
+        # Compute  loss
         c_activ = content_model(mod_input)
         g_c_activ = content_model(mod_gen)
-        content_loss = utils.content_loss(c_activ, g_c_activ)
 
-        # Compute style loss
         s_activ = style_model(mod_style)
         g_s_activ = style_model(mod_gen)
-        style_loss = utils.style_loss_overall(s_activ, g_s_activ)
 
-        # Compute total loss
-        total_loss = utils.total_loss(content_loss, style_loss)
+        total_loss = utils.total_loss(c_activ, g_c_activ, s_activ, g_s_activ)
 
         # Update generated image
         training_step(mod_gen, optimizer, total_loss)
@@ -160,8 +156,6 @@ def generate(input_image, style_image, iterations = 200):
         # Print every 10 iterations to track progress
         if x % 10 == 0:
             print('Iteration #: ', x)
-            print('Content loss: ', content_loss)
-            print('Style loss: ', style_loss)
             print('Total loss: ', total_loss)
 
     return mod_gen
