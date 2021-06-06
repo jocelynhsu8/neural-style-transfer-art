@@ -146,7 +146,7 @@ def generate(input_image, style_image, iterations = 200):
     
     # Store content & style activations for inputs
     c_activ = content_model(mod_input)
-    s_activ = stlye_model(mod_style)
+    s_activ = style_model(mod_style)
 
     # Optimization loop
     for x in range(iterations):

@@ -1,4 +1,6 @@
 import numpy as np
+import tensorflow as tf
+from tensorflow import keras
 
 def content_loss(content_img, gen_img):
     """ Calculate mean squared error between activations of content image and generated image.
@@ -9,7 +11,7 @@ def content_loss(content_img, gen_img):
 
     Returns:
         int: Computed mean squared error of activation
-    """
+
     if content_img.shape != gen_img.shape:
         print('Images have different dimensions')
         exit()
@@ -21,6 +23,10 @@ def content_loss(content_img, gen_img):
                 error += (content_img[0][i][j][k] - gen_img[0][i][j][k]) ** 2
             
     error /= content_img.shape[1] * content_img.shape[2] * content_img.shape[3]
+    """
+
+    error = keras.backend.sum(keras.backend.square(gen_img - content_img))
+    print('Computed content_loss: ', error)
     return error
 
 def calc_gram(filter):
