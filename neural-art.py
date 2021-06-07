@@ -108,7 +108,7 @@ def output_to_image(out):
     out = out * 255 # values in tensor are from 0 - 1
     out = np.array(out, dtype = np.uint8)
 
-    if np.dim(out) > 3:
+    if np.ndim(out) > 3:
         out = out[0]
 
     return Image.fromarray(out) 
@@ -136,7 +136,7 @@ def intermediate_layers(layer_names):
 def bound_values(image):
     return tf.clip_by_value(image, clip_value_min = 0.0, clip_value_max = 1.0)
 
-def generate(input_image, style_image, iterations = 11):
+def generate(input_image, style_image, iterations = 100):
     """ Generates resulting image through series of optimizations
 
     Args:
@@ -180,6 +180,7 @@ def generate(input_image, style_image, iterations = 11):
     
     # Optimization loop
     for x in range(iterations):
+        print('Step: ', x)
         
         with tf.GradientTape() as tape:
             # Preprocess generated image
@@ -216,11 +217,10 @@ def main():
     style_image = load_style_image()
     save_dir = get_save_dir()
 
-    result = generate(input_image, style_image)
+    result = generate(input_image, style_image, 10)
 
-    #result = np.clip(result, 0, 255).astype('uint8')
-    #result_image = Image.fromarray(result)
-    #result_image.save(save_dir)
+    out = output_to_image(result)
+    out.save(save_dir, format='png')
     
     print('Output image saved successfully! ')
 
