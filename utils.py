@@ -37,8 +37,9 @@ def calc_gram(filter):
     Returns:
         [np array]: Gram matrix of layer
     """
-    filter_t = np.transpose(filter)
-    return np.matmul(filter, filter_t)
+    return tf.linalg.matmul(filter, filter, transpose_b = True)
+    # filter_t = np.transpose(filter)
+    # return np.matmul(filter, filter_t)
 
 def style_loss_ind(style_img, gen_img, weight): 
     """ Calculate mean squared error of individual filter.
