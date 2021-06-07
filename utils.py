@@ -56,12 +56,7 @@ def style_loss_ind(style_img, gen_img, weight):
     if style_gram_mat.shape != gen_gram_mat.shape:
         print('Images have different dimensions')
         exit()
-    error = 0
-    for i in range(0, style_gram_mat.shape[1]):
-        for j in range(0, style_gram_mat.shape[2]):
-            for k in range(0, style_gram_mat.shape[3]):
-                error += (style_gram_mat[1][i][j][k] - gen_gram_mat[1][i][j][k]) ** 2
-            
+    error = tf.add_n([tf.reduce_mean((style_gram_mat - gen_gram_mat) ** 2)])    
     error /= style_gram_mat.shape[1] * style_gram_mat.shape[2] * style_gram_mat.shape[3]
     return error * weight
 
@@ -95,8 +90,8 @@ def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list,
         content_gen_img (np array): Generated image for content error calculation
         style_img_list (list of np arrays): List of style image filters
         style_gen_img_list (list of np arrays): List of generated image filters for style error calculation
-        alpha (double): Weight for content error
-        beta (double): Weight for style error
+        alpha (double): Weight for content error. Defaults to 0.5.
+        beta (double): Weight for style error. Defaults to 0.5.
         weight (list, optional): List of weights for style image filters. Defaults to [].
 
     Returns:
