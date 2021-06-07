@@ -5,8 +5,8 @@ def content_loss(content_img, gen_img):
     """ Calculate mean squared error between activations of content image and generated image.
 
     Args:
-        contentimg (np array): content image
-        gen_img (np array): generated image
+        content_ing (tf.Tensor): Activation tensor for content image
+        gen_img (tf.Tensor): Activation tensor for generated image
 
     Returns:
         int: Computed mean squared error of activation
@@ -65,8 +65,8 @@ def style_loss_overall(style_img, gen_img, weight = []):
     """ Calculate overall weighted mean squared error of all layers
 
     Args:
-        style_img (list of np array): List of style images
-        gen_img (list of np array): List of generated images
+        style_img (list of tf.Tensor): List of activation tensors for style image
+        gen_img (list of tf.Tensor): List of activation tensors for generated image
         weight (list, optional): List of weights for each layer. weight[i] is weight of layer i - 1. Defaults to [].
 
     Returns:
@@ -82,18 +82,18 @@ def style_loss_overall(style_img, gen_img, weight = []):
         gen_gram_mat = calc_gram(gen_img[i])
         error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i])
         print('Style loss: ', error)
-
-    print('Style loss: ', error)
+    
+    assert(not tf.math.is_inf(error))
     return error
     
 def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):
     """ Calculate total loss with weighted content and style mean squared errors
 
     Args:
-        content_img (np array): Content image
-        content_gen_img (np array): Generated image for content error calculation
-        style_img_list (list of np arrays): List of style image filters
-        style_gen_img_list (list of np arrays): List of generated image filters for style error calculation
+        content_img (tf.Tensor): Activation tensor for content image
+        content_gen_img (tf.Tensor): Activation tensor for content layer on generated image
+        style_img_list (list of tf.Tensor): List of activation tensors for style image
+        style_gen_img_list (list of tf.Tensor): List of activation tensors for style layers on generated image
         alpha (double): Weight for content error. Defaults to 0.5.
         beta (double): Weight for style error. Defaults to 0.5.
         weight (list, optional): List of weights for style image filters. Defaults to [].
