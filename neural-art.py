@@ -133,33 +133,10 @@ def intermediate_layers(layer_names):
 
     return tf.keras.Model([model.input], outputs)
 
-@tf.function()
-def training_step(image, optimizer, total_loss):
-    """ Performs one step of gradient descent to optimize image
-    
-    Args:
-        image (tf.Variable): generated image to optimize
-        total_loss (tf.Tensor): total loss (style and content)
-        optimizer (tf.optimizers): TF Optimizer (Adam)
-    """
-
-    print('Image: ', image)
-    print('Loss: ', total_loss)
-    with tf.GradientTape() as tape:
-        tape.watch(image)
-        grad = tape.gradient(total_loss, image)
-
-        print(grad)
-
-        assert(grad is not None)
-
-        optimizer.apply_gradients([(grad, image)])
-        image.assign(bound_values(image))
-
 def bound_values(image):
     return tf.clip_by_value(image, clip_value_min = 0.0, clip_value_max = 1.0)
 
-def generate(input_image, style_image, iterations = 200):
+def generate(input_image, style_image, iterations = 11):
     """ Generates resulting image through series of optimizations
 
     Args:
@@ -201,27 +178,31 @@ def generate(input_image, style_image, iterations = 200):
     style_model = intermediate_layers(s_layers)
     content_model = intermediate_layers([c_layer])
     
-    # Store content & style activations for inputs
-    c_activ = content_model(mod_input)
-    s_activ = style_model(mod_style)
-
     # Optimization loop
     for x in range(iterations):
-        print('Step: ', x)
-
-        # Preprocess generated image
-        mod_gen = gen_img * 255
-        mod_gen = tf.keras.applications.vgg19.preprocess_input(mod_gen)
-
-        # Compute  loss
-        g_c_activ = content_model(mod_gen)
-        g_s_activ = style_model(mod_gen)
-
-        total_loss = utils.total_loss(c_activ, g_c_activ, s_activ, g_s_activ)
-
-        # Update generated image
-        training_step(gen_img, optimizer, total_loss)
         
+        with tf.GradientTape() as tape:
+            # Preprocess generated image
+            mod_gen = gen_img * 255
+            mod_gen = tf.keras.applications.vgg19.preprocess_input(mod_gen)
+            
+            # Extract activations
+            c_activ = content_model(mod_input)
+            g_c_activ = content_model(mod_gen)
+            s_activ = style_model(mod_style)
+            g_s_activ = style_model(mod_gen)
+            
+            # Compute loss
+            total_loss = utils.total_loss(c_activ, g_c_activ, s_activ, g_s_activ)
+            
+            # Update generated image through backpropagation
+            grad = tape.gradient(total_loss, gen_img)
+
+            assert(grad is not None)
+
+            optimizer.apply_gradients([(grad, gen_img)])
+            gen_img.assign(bound_values(gen_img))
+
         # Print every 10 iterations to track progress
         if x % 10 == 0:
             print('Iteration #: ', x)

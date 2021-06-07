@@ -10,21 +10,9 @@ def content_loss(content_img, gen_img):
     Returns:
         int: Computed mean squared error of activation
 
-    if content_img.shape != gen_img.shape:
-        print('Images have different dimensions')
-        exit()
-    error = 0
-    for i in range(0, content_img.shape[1]):
-        print('i : ', i, ' out of: ', content_img.shape[1])
-        for j in range(0, content_img.shape[2]):
-            for k in range(0, content_img.shape[3]):
-                error += (content_img[0][i][j][k] - gen_img[0][i][j][k]) ** 2
-            
-    error /= content_img.shape[1] * content_img.shape[2] * content_img.shape[3]
     """
     
     error = tf.add_n([tf.reduce_mean((content_img - gen_img) ** 2)])
-    print('Computed content_loss: ', error)
     return error
 
 def calc_gram(filter):
@@ -80,16 +68,15 @@ def style_loss_overall(style_img, gen_img, weight = []):
     if len(weight) == 0: # equal weight of each layer if weight not specified
         for i in range(0,num_layers):
             weight.append(1 / num_layers)
-
+    
     error = 0
+    
     for i in range(0, num_layers):
         error += style_loss_ind(style_img[i], gen_img[i], weight[i])
-        print('Style loss: ', error)
-    
     error /= num_layers
 
     assert(not tf.math.is_inf(error))
-
+    
     return error
     
 def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):
