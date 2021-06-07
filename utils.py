@@ -1,4 +1,3 @@
-import numpy as np
 import tensorflow as tf
 
 def content_loss(content_img, gen_img):
@@ -54,11 +53,12 @@ def style_loss_ind(style_img, gen_img, weight):
     """
     style_gram_mat = calc_gram(style_img)
     gen_gram_mat = calc_gram(gen_img)
+
     if style_gram_mat.shape != gen_gram_mat.shape:
         print('Images have different dimensions')
         exit()
+
     error = tf.add_n([tf.reduce_mean((style_gram_mat - gen_gram_mat) ** 2)])    
-    error /= (style_gram_mat.shape[1] * style_gram_mat.shape[2] * style_gram_mat.shape[3])
     return error * weight
 
 def style_loss_overall(style_img, gen_img, weight = []):
@@ -72,18 +72,22 @@ def style_loss_overall(style_img, gen_img, weight = []):
     Returns:
         [double]: Overall weighted mean squared error of style image
     """
+
+    num_layers = len(style_img) 
+
     if len(weight) == 0: # equal weight of each layer if weight not specified
-        num_layers = len(style_img)
         for i in range(0,num_layers):
             weight.append(1 / num_layers)
+
     error = 0
     for i in range(0, num_layers):
-        style_gram_mat = calc_gram(style_img[i])
-        gen_gram_mat = calc_gram(gen_img[i])
-        error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i])
+        error += style_loss_ind(style_img[i], gen_img[i], weight[i])
         print('Style loss: ', error)
     
+    error /= num_layers
+
     assert(not tf.math.is_inf(error))
+
     return error
     
 def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):

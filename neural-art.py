@@ -102,6 +102,7 @@ def training_step(image, optimizer, total_loss):
     print('Image: ', image)
     print('Loss: ', total_loss)
     with tf.GradientTape() as tape:
+        tape.watch(image)
         grad = tape.gradient(total_loss, image)
 
         assert(grad is not None)
