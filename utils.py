@@ -51,8 +51,10 @@ def style_loss_ind(style_img, gen_img, weight):
     Returns:
         [double]: Weighted mean squared error of filter
     """
+
     style_gram_mat = calc_gram(style_img)
     gen_gram_mat = calc_gram(gen_img)
+
 
     if style_gram_mat.shape != gen_gram_mat.shape:
         print('Images have different dimensions')

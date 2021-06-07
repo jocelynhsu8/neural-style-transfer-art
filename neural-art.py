@@ -7,8 +7,32 @@ import os
 from PIL import Image
 import utils
 
-def load_input_image(filename = '', img_path = '', dim = (400, 400)):
-    """ Load input image based on user-specified filename. Images are resized to 400 x 400.
+
+def load_image(image_path, dim = (512, 512)):
+    """ Loads and resizes image found at image_path
+    
+    Args:
+        image_path (string): Relative path of image to load
+
+    Returns:
+        tf.Tensor: Tensor representation of image
+    """
+
+    img = tf.io.read_file(image_path)
+    img = tf.image.decode_image(img, channels = 3)
+    img = tf.image.convert_image_dtype(img, tf.float32)
+    
+    shape = tf.cast(tf.shape(img)[:-1], tf.float32)
+    long_size = max(shape)
+
+    new_shape = tf.cast(dim, tf.int32)
+
+    img = tf.image.resize(img, new_shape)
+    img = img[tf.newaxis, :]
+    return img
+
+def load_input_image(filename = '', img_path = ''):
+    """ Load input image based on user-specified filename.
 
     Returns:
         np array: Input (content) image
@@ -22,14 +46,15 @@ def load_input_image(filename = '', img_path = '', dim = (400, 400)):
         
         print('ERROR: Input image not found')
     
-    img = image.load_img(img_path)
-    data = image.img_to_array(img)
-    input_image = np.array([data])
-    input_image = image.smart_resize(input_image[0], dim, interpolation = 'bilinear') 
-    return input_image
+    #img = image.load_img(img_path)
+    #data = image.img_to_array(img)
+    #input_image = np.array([data])
+    #input_image = image.smart_resize(input_image[0], dim, interpolation = 'bilinear') 
+    #return input_image
+    
+    return load_image(img_path)
 
-
-def load_style_image(filename = '', img_path = '', dim = (400, 400)):
+def load_style_image(filename = '', img_path = ''):
     """ Load style image based on user-specified filename. Images are resized to 640 x 480.
 
     Returns:
@@ -45,11 +70,13 @@ def load_style_image(filename = '', img_path = '', dim = (400, 400)):
         
         print('ERROR: Style image not found')
     
-    img = image.load_img(img_path)
-    data = image.img_to_array(img)
-    style_image = np.array([data])
-    style_image = image.smart_resize(style_image[0], dim, interpolation = 'bilinear')
-    return style_image
+    #img = image.load_img(img_path)
+    #data = image.img_to_array(img)
+    #style_image = np.array([data])
+    #style_image = image.smart_resize(style_image[0], dim, interpolation = 'bilinear')
+    #return style_image
+
+    return load_image(img_path)
 
 def get_save_dir():
     """ Prompt user to receive valid save filename
@@ -68,6 +95,24 @@ def get_save_dir():
         print('ERROR: File with given filename already exists!')
     return save_dir
 
+def output_to_image(out):
+    """ Creates image from output tensor
+    
+    Args: 
+        out (tf.Tensor): Tensor output from model
+
+    Returns:
+        PIL.Image: Image represented by tensor
+    """
+
+    out = out * 255 # values in tensor are from 0 - 1
+    out = np.array(out, dtype = np.uint8)
+
+    if np.dim(out) > 3:
+        out = out[0]
+
+    return Image.fromarray(out) 
+
 def intermediate_layers(layer_names):
     """ Creates a mini-model with desired layer outputs
 
@@ -79,8 +124,7 @@ def intermediate_layers(layer_names):
     """
     model = tf.keras.applications.VGG19(
             include_top = False, 
-            weights = 'imagenet', 
-            input_shape = (400, 400, 3))
+            weights = 'imagenet')
     model.trainable = False
 
     outputs = []
@@ -95,7 +139,7 @@ def training_step(image, optimizer, total_loss):
     
     Args:
         image (tf.Variable): generated image to optimize
-        total_loss (?): total loss (style and content)
+        total_loss (tf.Tensor): total loss (style and content)
         optimizer (tf.optimizers): TF Optimizer (Adam)
     """
 
@@ -105,6 +149,8 @@ def training_step(image, optimizer, total_loss):
         tape.watch(image)
         grad = tape.gradient(total_loss, image)
 
+        print(grad)
+
         assert(grad is not None)
 
         optimizer.apply_gradients([(grad, image)])
@@ -113,24 +159,27 @@ def training_step(image, optimizer, total_loss):
 def bound_values(image):
     return tf.clip_by_value(image, clip_value_min = 0.0, clip_value_max = 1.0)
 
-# TODO: FINISH IMPLEMENTATION
 def generate(input_image, style_image, iterations = 200):
     """ Generates resulting image through series of optimizations
 
     Args:
-        input_image (np array): content image
-        style_image (np array): style image
+        input_image (tf.Tensor): Tensor representation of input image
+        style_image (tf.Tensor): Tensor representation of style image
         iterations (int): number of optimization iterations
 
     Returns:
         np array: Generated image
     """
-    # Expand dimensions to account for batch_size when sending to model
-    mod_input = np.expand_dims(input_image, axis = 0)
-    mod_style = np.expand_dims(style_image, axis = 0)
+
+    # Preprocess images
+    mod_input = input_image * 255
+    mod_input = tf.keras.applications.vgg19.preprocess_input(mod_input)
+    
+    mod_style = style_image * 255
+    mod_style = tf.keras.applications.vgg19.preprocess_input(mod_style)
 
     # Let generated_image be replica of input to begin with (May later change to noise)
-    mod_gen = tf.Variable(mod_input)
+    gen_img = tf.Variable(input_image)
    
     # Store content & style layers
     c_layer = 'block4_conv2'
@@ -143,8 +192,9 @@ def generate(input_image, style_image, iterations = 200):
     # Initialize VGG19 model
     model = tf.keras.applications.VGG19(
             include_top = False, 
-            weights = 'imagenet', 
-            input_shape = (400, 400, 3))
+            weights = 'imagenet')
+    model.trainable = False
+
     optimizer = tf.optimizers.Adam(learning_rate=0.02)
     
     # Initialize mini-models
@@ -158,6 +208,11 @@ def generate(input_image, style_image, iterations = 200):
     # Optimization loop
     for x in range(iterations):
         print('Step: ', x)
+
+        # Preprocess generated image
+        mod_gen = gen_img * 255
+        mod_gen = tf.keras.applications.vgg19.preprocess_input(mod_gen)
+
         # Compute  loss
         g_c_activ = content_model(mod_gen)
         g_s_activ = style_model(mod_gen)
@@ -165,7 +220,7 @@ def generate(input_image, style_image, iterations = 200):
         total_loss = utils.total_loss(c_activ, g_c_activ, s_activ, g_s_activ)
 
         # Update generated image
-        training_step(mod_gen, optimizer, total_loss)
+        training_step(gen_img, optimizer, total_loss)
         
         # Print every 10 iterations to track progress
         if x % 10 == 0:
