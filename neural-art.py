@@ -98,10 +98,16 @@ def training_step(image, optimizer, total_loss):
         total_loss (?): total loss (style and content)
         optimizer (tf.optimizers): TF Optimizer (Adam)
     """
-    tape = tf.GradientTape()
-    grad = tape.gradient(total_loss, image)
-    optimizer.apply_gradients([(grad, image)])
-    image.assign(bound_values(image))
+
+    print('Image: ', image)
+    print('Loss: ', total_loss)
+    with tf.GradientTape() as tape:
+        grad = tape.gradient(total_loss, image)
+
+        assert(grad is not None)
+
+        optimizer.apply_gradients([(grad, image)])
+        image.assign(bound_values(image))
 
 def bound_values(image):
     return tf.clip_by_value(image, clip_value_min = 0.0, clip_value_max = 1.0)
@@ -123,7 +129,7 @@ def generate(input_image, style_image, iterations = 200):
     mod_style = np.expand_dims(style_image, axis = 0)
 
     # Let generated_image be replica of input to begin with (May later change to noise)
-    mod_gen = mod_input
+    mod_gen = tf.Variable(mod_input)
    
     # Store content & style layers
     c_layer = 'block4_conv2'

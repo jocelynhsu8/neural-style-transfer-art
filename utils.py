@@ -58,7 +58,7 @@ def style_loss_ind(style_img, gen_img, weight):
         print('Images have different dimensions')
         exit()
     error = tf.add_n([tf.reduce_mean((style_gram_mat - gen_gram_mat) ** 2)])    
-    error /= style_gram_mat.shape[1] * style_gram_mat.shape[2] * style_gram_mat.shape[3]
+    error /= (style_gram_mat.shape[1] * style_gram_mat.shape[2] * style_gram_mat.shape[3])
     return error * weight
 
 def style_loss_overall(style_img, gen_img, weight = []):
@@ -81,6 +81,9 @@ def style_loss_overall(style_img, gen_img, weight = []):
         style_gram_mat = calc_gram(style_img[i])
         gen_gram_mat = calc_gram(gen_img[i])
         error += style_loss_ind(style_gram_mat, gen_gram_mat, weight[i])
+        print('Style loss: ', error)
+
+    print('Style loss: ', error)
     return error
     
 def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):
