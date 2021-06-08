@@ -65,9 +65,12 @@ def style_loss_overall(style_img, gen_img, weight = []):
 
     num_layers = len(style_img) 
 
-    if len(weight) == 0: # equal weight of each layer if weight not specified
+    if len(weight) == 0: # descending geometric progression each layer if weight not specified
+        cur = 0.5
+        sum_weight = 0.5 * (1 - 0.5 ** num_layers) / 0.5 # normalize total sum of weights to 1
         for i in range(0,num_layers):
-            weight.append(1 / num_layers)
+            weight.append(cur / sum_weight)
+            cur *= 0.5
     
     error = 0
     
