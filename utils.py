@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-def content_loss(content_img, gen_img):
+def content_loss(content_img, gen_img, weight = 0.5):
     """ Calculate mean squared error between activations of content image and generated image.
 
     Args:
@@ -13,7 +13,7 @@ def content_loss(content_img, gen_img):
     """
     
     error = tf.add_n([tf.reduce_mean((content_img - gen_img) ** 2)])
-    return error
+    return error * weight
 
 def calc_gram(filter):
     """ Calculate gram matrix to find correlations of feature maps in single layer.
@@ -82,7 +82,7 @@ def style_loss_overall(style_img, gen_img, weight = []):
     
     return error
     
-def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.5, beta = 0.5, weight = []):
+def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.1, beta = 0.4, weight = [0.6, 0.5, 0.2, 0.1, 0.1]):
     """ Calculate total loss with weighted content and style mean squared errors
 
     Args:
