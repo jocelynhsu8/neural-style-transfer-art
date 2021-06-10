@@ -1,4 +1,5 @@
 import numpy as np
+import time
 from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
@@ -150,6 +151,27 @@ def optimize_image(generated_image, target_content, target_style, content_model,
 
     return loss
 
+def calc_eta(n):
+    """ Creates a string representation of the ETA of image generation
+
+    Args:
+        seconds_left (int): number of seconds left in image generation
+    
+    Returns:
+        string: String representation of ETA
+
+    """
+    days = n // (24 * 3600)
+    n = n % (24 * 3600)
+    hours = n // 3600
+    n = n % 3600
+    minutes = n // 60
+    n = n % 60
+    seconds = n
+
+    eta = str(days) + ' days, ' + str(hours) + ' hours, ' + str(minutes) + ' minutes and ' + str(seconds) + ' seconds.'
+    return eta
+
 def generate(input_image, style_image, iterations = 100):
     """ Generates resulting image through series of optimizations
 
@@ -196,9 +218,22 @@ def generate(input_image, style_image, iterations = 100):
     # Initialize generated_image
     generated_image = tf.Variable(input_image)
 
+    # Run first step to establish ETA
+    print('Step: 1 of ', iterations, ' ETA: Calculating')
+    start_time = time.time()
+    loss = optimize_image(
+            generated_image,
+            target_content,
+            target_style,
+            content_model,
+            style_model,
+            optimizer)
+    iter_duration = time.time() - start_time
+
     # Optimization loop
-    for x in range(iterations):
-        print('Step: ', x, ' of ', iterations)
+    for x in range(iterations - 1):
+        eta = calc_eta( (iterations - 1 - x) * iter_duration)
+        print('Step: ', x + 1, ' of ', iterations, ' ETA: ', eta)
 
         loss = optimize_image(
                 generated_image,

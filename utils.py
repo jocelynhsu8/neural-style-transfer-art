@@ -24,7 +24,6 @@ def calc_gram(input_tensor):
     Returns:
         [tf.Tensor]: Gram matrix of layer
     """
-    #return tf.linalg.matmul(filter, filter, transpose_b = True)
     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
     input_shape = tf.shape(input_tensor)
     num_locations = tf.cast(input_shape[1] * input_shape[2], tf.float32)
