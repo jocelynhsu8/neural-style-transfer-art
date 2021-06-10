@@ -15,18 +15,20 @@ def content_loss(content_img, gen_img, weight = 0.5):
     error = tf.add_n([tf.reduce_mean((content_img - gen_img) ** 2)])
     return error * weight
 
-def calc_gram(filter):
+def calc_gram(input_tensor):
     """ Calculate gram matrix to find correlations of feature maps in single layer.
 
     Args:
-        filter (np array): Individual layer
+        input_tensor (tf.Tensor): Individual layer
 
     Returns:
-        [np array]: Gram matrix of layer
+        [tf.Tensor]: Gram matrix of layer
     """
-    return tf.linalg.matmul(filter, filter, transpose_b = True)
-    # filter_t = np.transpose(filter)
-    # return np.matmul(filter, filter_t)
+    #return tf.linalg.matmul(filter, filter, transpose_b = True)
+    result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
+    input_shape = tf.shape(input_tensor)
+    num_locations = tf.cast(input_shape[1] * input_shape[2], tf.float32)
+    return result / (num_locations)
 
 def style_loss_ind(style_img, gen_img, weight): 
     """ Calculate mean squared error of individual filter.
@@ -82,7 +84,7 @@ def style_loss_overall(style_img, gen_img, weight = []):
     
     return error
     
-def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.1, beta = 0.4, weight = [0.6, 0.5, 0.2, 0.1, 0.1]):
+def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.2, beta = 1.1, weight = [1.2, 1.1, 1, 1, 1]):
     """ Calculate total loss with weighted content and style mean squared errors
 
     Args:

@@ -183,7 +183,7 @@ def generate(input_image, style_image, iterations = 100):
             weights = 'imagenet')
     model.trainable = False
 
-    optimizer = tf.optimizers.Adam(learning_rate = 0.003)
+    optimizer = tf.optimizers.Adam(learning_rate = 0.02)
     
     # Initialize mini-models
     style_model = intermediate_layers(s_layers)
@@ -198,7 +198,7 @@ def generate(input_image, style_image, iterations = 100):
 
     # Optimization loop
     for x in range(iterations):
-        print('Step: ', x)
+        print('Step: ', x, ' of ', iterations)
 
         loss = optimize_image(
                 generated_image,
@@ -217,7 +217,7 @@ def main():
     style_image = load_style_image()
     save_dir = get_save_dir()
 
-    result = generate(input_image, style_image, 300)
+    result = generate(input_image, style_image, 800)
 
     out = output_to_image(result)
     out.save(save_dir, format='png')
