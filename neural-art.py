@@ -172,7 +172,7 @@ def calc_eta(n):
     eta = str(days) + ' days, ' + str(hours) + ' hours, ' + str(minutes) + ' minutes and ' + str(seconds) + ' seconds.'
     return eta
 
-def generate(input_image, style_image, iterations = 100, impact):
+def generate(input_image, style_image, impact, iterations = 100):
     """ Generates resulting image through series of optimizations
 
     Args:
