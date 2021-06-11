@@ -125,7 +125,7 @@ def intermediate_layers(layer_names):
 def bound_values(image):
     return tf.clip_by_value(image, clip_value_min = 0.0, clip_value_max = 1.0)
 
-def optimize_image(generated_image, target_content, target_style, content_model, style_model, optimizer):
+def optimize_image(generated_image, target_content, target_style, content_model, style_model, optimizer, impact):
     
     loss = None
 
@@ -138,7 +138,7 @@ def optimize_image(generated_image, target_content, target_style, content_model,
         content = content_model(processed)
         style = style_model(processed)
 
-        loss = utils.total_loss(target_content, content, target_style, style)
+        loss = utils.total_loss(target_content, content, target_style, style, impact)
 
         grad = tape.gradient(loss, generated_image)
 
@@ -172,7 +172,7 @@ def calc_eta(n):
     eta = str(days) + ' days, ' + str(hours) + ' hours, ' + str(minutes) + ' minutes and ' + str(seconds) + ' seconds.'
     return eta
 
-def generate(input_image, style_image, iterations = 100):
+def generate(input_image, style_image, iterations = 100, impact):
     """ Generates resulting image through series of optimizations
 
     Args:
@@ -227,7 +227,8 @@ def generate(input_image, style_image, iterations = 100):
             target_style,
             content_model,
             style_model,
-            optimizer)
+            optimizer,
+            impact)
     iter_duration = time.time() - start_time
 
     # Optimization loop
@@ -241,7 +242,8 @@ def generate(input_image, style_image, iterations = 100):
                 target_style,
                 content_model,
                 style_model,
-                optimizer
+                optimizer,
+                impact
                 )
         
     return generated_image
@@ -252,10 +254,17 @@ def main():
     style_image = load_style_image()
     save_dir = get_save_dir()
 
-    result = generate(input_image, style_image, 800)
-
+    result = generate(input_image, style_image, 800, 'light')
     out = output_to_image(result)
-    out.save(save_dir, format='png')
+    out.save(save_dir+'_light', format='png')
+
+    result = generate(input_image, style_image, 800, 'medium')
+    out = output_to_image(result)
+    out.save(save_dir+'_medium', format='png')
+
+    result = generate(input_image, style_image, 800, 'heavy')
+    out = output_to_image(result)
+    out.save(save_dir+'_heavy', format='png')
     
     print('Output image saved successfully! ')
 

@@ -83,7 +83,7 @@ def style_loss_overall(style_img, gen_img, weight = []):
     
     return error
     
-def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.2, beta = 1.1, weight = [1.2, 1.1, 1, 1, 1]):
+def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list, alpha = 0.2, beta = 1.1, weight = [1.2, 1.1, 1, 1, 1], impact = 'medium'):
     """ Calculate total loss with weighted content and style mean squared errors
 
     Args:
@@ -98,6 +98,18 @@ def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list,
     Returns:
         [double]: Overall error
     """
+    if impact == 'light':
+        alpha = 0.4
+        beta = 1
+    elif impact == 'medium':
+        alpha = 0.2
+        beta = 1.1
+    elif impact == 'heavy':
+        alpha = 0.15
+        beta = 1.3
+    else:
+        print("Impact needs to be 'light', 'medium', or 'heavy' - set to 'medium'")
+        
     return alpha * content_loss(content_img, content_gen_img) + beta * style_loss_overall(style_img_list, style_gen_img_list, weight)
 
 
