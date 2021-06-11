@@ -254,15 +254,15 @@ def main():
     style_image = load_style_image()
     save_dir = get_save_dir()
 
-    result = generate(input_image, style_image, 800, 'light')
+    result = generate(input_image, style_image, 'light', 800)
     out = output_to_image(result)
     out.save(save_dir+'_light', format='png')
 
-    result = generate(input_image, style_image, 800, 'medium')
+    result = generate(input_image, style_image, 'medium', 800)
     out = output_to_image(result)
     out.save(save_dir+'_medium', format='png')
 
-    result = generate(input_image, style_image, 800, 'heavy')
+    result = generate(input_image, style_image, 'heavy', 800)
     out = output_to_image(result)
     out.save(save_dir+'_heavy', format='png')
     

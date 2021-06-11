@@ -22,7 +22,7 @@ def calc_gram(input_tensor):
         input_tensor (tf.Tensor): Individual layer
 
     Returns:
-        [tf.Tensor]: Gram matrix of layer
+        tf.Tensor: Gram matrix of layer
     """
     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
     input_shape = tf.shape(input_tensor)
@@ -38,7 +38,7 @@ def style_loss_ind(style_img, gen_img, weight):
         weight (double): Weight of layer
 
     Returns:
-        [double]: Weighted mean squared error of filter
+        double: Weighted mean squared error of filter
     """
 
     style_gram_mat = calc_gram(style_img)
@@ -61,7 +61,7 @@ def style_loss_overall(style_img, gen_img, weight = []):
         weight (list, optional): List of weights for each layer. weight[i] is weight of layer i - 1. Defaults to [].
 
     Returns:
-        [double]: Overall weighted mean squared error of style image
+        double: Overall weighted mean squared error of style image
     """
 
     num_layers = len(style_img) 
@@ -96,7 +96,7 @@ def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list,
         weight (list, optional): List of weights for style image filters. Defaults to [].
 
     Returns:
-        [double]: Overall error
+        double: Overall error
     """
     if impact == 'light':
         alpha = 0.4
@@ -109,7 +109,7 @@ def total_loss(content_img, content_gen_img, style_img_list, style_gen_img_list,
         beta = 1.3
     else:
         print("Impact needs to be 'light', 'medium', or 'heavy' - set to 'medium'")
-        
+
     return alpha * content_loss(content_img, content_gen_img) + beta * style_loss_overall(style_img_list, style_gen_img_list, weight)
 
 
