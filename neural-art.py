@@ -9,7 +9,7 @@ from PIL import Image
 import utils
 
 
-def load_image(image_path, dim = (512, 512)):
+def load_image(image_path, dim = (768, 768)):
     """ Loads and resizes image found at image_path
     
     Args:
@@ -252,7 +252,7 @@ def main():
     style_image = load_style_image()
     save_dir = get_save_dir()
 
-    result = generate(input_image, style_image, 800)
+    result = generate(input_image, style_image, 2000)
 
     out = output_to_image(result)
     out.save(save_dir, format='png')
