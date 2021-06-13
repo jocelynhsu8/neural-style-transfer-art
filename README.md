@@ -3,8 +3,13 @@ A simple interactive program which performs neural style transfer to paint an in
 
 # Sample
 ![](samples/dogpicassofinal.png)
+
 The above sample was made by styling the following picture of a dog with Picasso's Smile!
-![](samples/dog.jpg) with ![](samples/picasso.jpeg)
+![](samples/dog.jpg) 
+
+with 
+
+![](samples/picasso.jpeg)
 
 # Setup
 Install dependencies
