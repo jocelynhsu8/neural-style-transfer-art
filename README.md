@@ -8,6 +8,12 @@ The above sample was made by styling the following picture of a dog with Picasso
 
 <img src="samples/dog.jpg" width="400" height="400"> <img src="samples/picasso.jpeg" width="400" height="400">
 
+<img src="samples/carmarblefinal.png" width="600" height="600">
+
+The above sample was made by styling the following picture of a car in the desert with an acrylic marble pattern!
+
+<img src="samples/car_desert.jpeg" width="400" height="400"> <img src="samples/marble_acrylic.jpeg" width="400" height="400">
+
 # Setup
 Install dependencies
 ```sh
