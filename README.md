@@ -2,12 +2,12 @@
 A simple interactive program which performs neural style transfer to paint an input image in the style of a style image. The program is largely based on the paper [A Neural Algorithm of Artistic Style](https://arxiv.org/pdf/1508.06576.pdf) by Gatys et. al. and an [article](https://towardsdatascience.com/art-with-ai-turning-photographs-into-artwork-with-neural-style-transfer-8144ece44bed) by Apratim Sahu on TowardsDataScience.
 
 # Sample
-<img src="samples/dogpicassofinal.png" width="400" height="400">
+<img src="samples/dogpicassofinal.png" width="600" height="600">
 The above sample was made by styling the following picture of a dog with Picasso's Smile!
 
-<img src="samples/dog.jpg" width="200" height="200">
+<img src="samples/dog.jpg" width="400" height="400">
 with 
-<img src="samples/picasso.jpeg" width="200" height="200">
+<img src="samples/picasso.jpeg" width="400" height="400">
 
 # Setup
 Install dependencies
