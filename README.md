@@ -4,7 +4,7 @@ A simple interactive program which performs neural style transfer to paint an in
 # Sample
 <img src="samples/dogpicassofinal.png" width="600" height="600">
 
-      The above sample was made by styling the following picture of a dog with Picasso's Smile!
+The above sample was made by styling the following picture of a dog with Picasso's Smile!
 
 <img src="samples/dog.jpg" width="400" height="400"> <img src="samples/picasso.jpeg" width="400" height="400">
 
