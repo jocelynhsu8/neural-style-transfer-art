@@ -9,7 +9,7 @@ from PIL import Image
 import utils
 
 
-def load_image(image_path, dim = (768, 768)):
+def load_image(image_path, dim = (700, 700)):
     """ Loads and resizes image found at image_path
     
     Args:
